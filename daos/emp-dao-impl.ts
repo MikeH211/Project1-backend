@@ -6,9 +6,7 @@ import { ResourceNotFoundError } from "../error-handles";
 import e from "cors";
 
 export class EmployeeDaoAzure implements EmployeeDao {
-  private client = new CosmosClient(
-    "AccountEndpoint=https://database-hanna-db.documents.azure.com:443/;AccountKey=dj4NexA9UeWDKZPGORQfFC7tudguUmFxJJgZqtJgjI0bNSn49xxe3iNAmO8M0xvzTJHJGQ7PozZZamITHLMVdw==;"
-  );
+  private client = new CosmosClient(process.env.COSMOS_CONNECTION);
   private database = this.client.database("reimbursementapp");
   private container = this.database.container("employees");
   private containerB = this.database.container("reimbursements");
@@ -21,15 +19,7 @@ export class EmployeeDaoAzure implements EmployeeDao {
     const response = await this.container.items.create<Employee>(employee);
     return response.resource;
   }
-  async createReimbursement(
-    reimbursement: Reimbursement
-  ): Promise<Reimbursement> {
-    reimbursement.id = v4();
-    const response = await this.containerB.items.create<Reimbursement>(
-      reimbursement
-    );
-    return response.resource;
-  }
+
   async addReimbursementToEmployee(
     id: string,
     reimbursement: Reimbursement
@@ -40,6 +30,12 @@ export class EmployeeDaoAzure implements EmployeeDao {
     employee.reimbursements.push(reimbursement);
     const response = await this.container.items.upsert<Employee>(employee);
     return response.resource;
+  }
+
+  async getEmployeeByUsername(username: string): Promise<Employee> {
+    const response = await this.container.items.readAll<Employee>().fetchAll();
+    const employees: Employee[] = response.resources;
+    return employees.find((e) => e.username === username);
   }
 
   async getAllEmployees(): Promise<Employee[]> {
@@ -58,13 +54,6 @@ export class EmployeeDaoAzure implements EmployeeDao {
       .readAll<Reimbursement>()
       .fetchAll();
     return response.resources;
-  }
-  async getReimbursementsByDate(date: string): Promise<Reimbursement[]> {
-    const response = await this.containerB.items
-      .readAll<Reimbursement>()
-      .fetchAll();
-    const reimbursements: Reimbursement[] = response.resources;
-    return reimbursements.filter((r) => r.requestDate === date);
   }
 
   async getReimbursementById(id: string): Promise<Reimbursement> {
@@ -87,11 +76,6 @@ export class EmployeeDaoAzure implements EmployeeDao {
     }
   }
 
-  async getEmployeeByUsername(username: string): Promise<Employee> {
-    const response = await this.container.items.readAll<Employee>().fetchAll();
-    const employees: Employee[] = response.resources;
-    return employees.find((e) => e.username === username);
-  }
   // updates reimbursement status, works great
   async updateReimbursement(
     id: string,

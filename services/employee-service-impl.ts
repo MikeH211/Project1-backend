@@ -9,16 +9,8 @@ export class EmployeeServiceImpl implements EmployeeService {
     this.employeeDao = employeeDao;
   }
 
-  retrieveReimbursementsByDate(date: string): Promise<Reimbursement[]> {
-    return this.employeeDao.getReimbursementsByDate(date);
-  }
-
   logEmployee(employee: Employee): Promise<Employee> {
     return this.employeeDao.createEmployee(employee);
-  }
-
-  logReimbursement(reimbursement: Reimbursement): Promise<Reimbursement> {
-    return this.employeeDao.createReimbursement(reimbursement);
   }
 
   retrieveAllEmployees(): Promise<Employee[]> {

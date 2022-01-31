@@ -7,9 +7,5 @@ export interface EmployeeService {
 
   retrievePendingReimbursements(): Promise<Reimbursement[]>;
 
-  logReimbursement(reimbursement: Reimbursement): Promise<Reimbursement>;
-
   logEmployee(employee: Employee): Promise<Employee>;
-
-  retrieveReimbursementsByDate(date: string): Promise<Reimbursement[]>;
 }

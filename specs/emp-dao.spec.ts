@@ -1,9 +1,14 @@
 import { EmployeeDao } from "../daos/emp-dao";
 import { EmployeeDaoAzure } from "../daos/emp-dao-impl";
+import { EmployeeService } from "../services/employee-service";
+import { EmployeeServiceImpl } from "../services/employee-service-impl";
 import { Employee, Reimbursement } from "../entities";
 
 describe("Reimbursements DAO Tests", () => {
   const employeeDao: EmployeeDao = new EmployeeDaoAzure();
+  const employeeService: EmployeeService = new EmployeeServiceImpl(employeeDao);
+  let savedEmployee: Employee = null;
+  let savedReimbursement: Reimbursement = null;
 
   let testEmployee: Employee = {
     id: "",
@@ -20,7 +25,7 @@ describe("Reimbursements DAO Tests", () => {
     reason: "",
     status: "",
     message: "",
-    requestDate: "0",
+    requestDate: "",
   };
 
   it("Should create employee", async () => {
@@ -28,20 +33,7 @@ describe("Reimbursements DAO Tests", () => {
       testEmployee
     );
     expect(returnedEmployee.id).toBeTruthy();
-    //testEmployee = returnedEmployee;   (maybe uncomment later cause it might be useful for the rest of the tests,
-    // we just didn't want to code in advance too much)
-  });
-
-  it("Should create reimbursement", async () => {
-    const returnedReimbursement: Reimbursement =
-      await employeeDao.createReimbursement(testReimbursement);
-    expect(returnedReimbursement.id).toBeTruthy();
-    testReimbursement = returnedReimbursement;
-  });
-
-  it("Should get an employee by username", async () => {
-    const employee = await employeeDao.getEmployeeByUsername("kingnothing21");
-    expect(employee.isManager).toBe(true);
+    savedEmployee = returnedEmployee;
   });
 
   it("Should get all Employees", async () => {
@@ -80,49 +72,22 @@ describe("Reimbursements DAO Tests", () => {
     expect(employees.length).toBeGreaterThan(3);
   });
 
-  it("Should get all Reimbursements", async () => {
-    const reimb1: Reimbursement = {
-      id: "",
-      amount: 240,
-      reason: "work trip",
-      status: "",
-      message: "",
-      requestDate: "0",
-    };
-    const reimb2: Reimbursement = {
-      id: "",
-      amount: 158,
-      reason: "bought work supplies",
-      status: "",
-      message: "",
-      requestDate: "3",
-    };
-    const reimb3: Reimbursement = {
-      id: "",
-      amount: 477,
-      reason: "took clients to dinner",
-      status: "",
-      message: "",
-      requestDate: "4",
-    };
-    await employeeDao.createReimbursement(reimb1);
-    await employeeDao.createReimbursement(reimb2);
-    await employeeDao.createReimbursement(reimb3);
-
-    const reimbursements: Reimbursement[] =
-      await employeeDao.getAllReimbursements();
-    expect(reimbursements.length).toBeGreaterThan(3);
+  it("Should retrieve all reimbursements", async () => {
+    const retrievedReimbursements: Reimbursement[] =
+      await employeeService.retrieveAllReimbursements();
+    expect(retrievedReimbursements).toBeDefined;
   });
 
-  it("Should get Reimbursements for that date", async () => {
-    const reimbursements: Reimbursement[] =
-      await employeeDao.getReimbursementsByDate("0");
-    expect(
-      reimbursements.some((e) => {
-        if (e.requestDate === testReimbursement.requestDate) {
-          return true;
-        }
-      })
-    ).toEqual(true);
+  it("Should retrieve all pending reimbursements", async () => {
+    const retievedPendingReimbursements: Reimbursement[] =
+      await employeeService.retrievePendingReimbursements();
+    expect(retievedPendingReimbursements).toBeDefined;
+  });
+
+  it("Should get employee by ID", async () => {
+    const employee: Employee = await employeeDao.getEmployeeById(
+      savedEmployee.id
+    );
+    expect(employee).toBeDefined;
   });
 });

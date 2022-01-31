@@ -6,10 +6,12 @@ import { EmployeeService } from "./services/employee-service";
 import { EmployeeServiceImpl } from "./services/employee-service-impl";
 import cors from "cors";
 import { LoginService, LoginServiceImpl } from "./services/login-service";
+import logMiddleware from "./middleware/logger-middleware";
 
 const app = express();
 app.use(express.json());
 app.use(cors());
+app.use(logMiddleware);
 
 const employeeDao: EmployeeDao = new EmployeeDaoAzure();
 const employeeService: EmployeeService = new EmployeeServiceImpl(employeeDao);
@@ -21,22 +23,6 @@ app.post("/employees", async (req, res) => {
   res.status(201);
   res.send(savedEmployee);
 });
-
-app.post("/reimbursements", async (req, res) => {
-  const reimbursement: Reimbursement = req.body;
-  const savedReimbursement: Reimbursement =
-    await employeeService.logReimbursement(reimbursement);
-  res.status(201);
-  res.send(savedReimbursement);
-});
-
-// app.post("/employees/:id/reimbursement", async(req,res)=>{
-//     const {id} = req.params;
-//     const reimbursement = req.body;
-//     await employeeDao.addReimbursementToEmployee(id,reimbursement)
-//     res.status(201)
-//     res.send(reimbursement)
-// })
 
 app.get("/employees", async (req, res) => {
   const employees: Employee[] = await employeeService.retrieveAllEmployees();
@@ -64,12 +50,6 @@ app.get("/pendingreimbursements", async (req, res) => {
   res.send(reimbursements);
 });
 
-app.get("/reimbursements/:date", async (req, res) => {
-  const { date } = req.params;
-  const reimbursements: Reimbursement[] =
-    await employeeService.retrieveReimbursementsByDate(date);
-  res.send(reimbursements);
-});
 app.get("/reimbursements/id/:id", async (req, res) => {
   const { id } = req.params;
   const reimbursement: Reimbursement = await employeeDao.getReimbursementById(

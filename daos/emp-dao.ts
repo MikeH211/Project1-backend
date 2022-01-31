@@ -4,8 +4,6 @@ export interface EmployeeDao {
   //Create
   createEmployee(employee: Employee): Promise<Employee>;
 
-  createReimbursement(reimbursement: Reimbursement): Promise<Reimbursement>;
-
   addReimbursementToEmployee(
     id: string,
     reimbursement: Reimbursement
@@ -16,11 +14,11 @@ export interface EmployeeDao {
 
   getAllReimbursements(): Promise<Reimbursement[]>;
 
-  getReimbursementsByDate(date: string): Promise<Reimbursement[]>;
-
-  getReimbursementById(id: string): Promise<Reimbursement>;
+  // getReimbursementsByDate(date: string): Promise<Reimbursement[]>;
 
   getEmployeeByUsername(username: string): Promise<Employee>;
+
+  getReimbursementById(id: string): Promise<Reimbursement>;
 
   getAllReimbursementsByEmployeeId(id: string): Promise<Reimbursement[]>;
 
